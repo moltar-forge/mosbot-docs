@@ -19,7 +19,14 @@ For application-level changes, see the changelogs in the respective repositories
 
 ## [Unreleased]
 
-_No unreleased changes._
+### mosbot-api
+
+#### Added
+
+- Committed `docker-compose.override.yml` for local development convenience (auto-loaded by docker
+  compose)
+- Development override swaps production nginx dashboard for Vite dev server with HMR and
+  bind-mounted source
 
 ---
 
