@@ -317,6 +317,12 @@ the first fallback for complex reasoning tasks.
     "telegram": {
       "enabled": true,
       "streaming": "partial",
+      "groupAllowFrom": [
+        "tg:123456789"
+      ],
+      "allowFrom": [
+        "tg:123456789"
+      ],
       "accounts": {
         "default": {
           "botToken": "${TELEGRAM_BOT_TOKEN}",
@@ -329,6 +335,9 @@ the first fallback for complex reasoning tasks.
           },
           "groupAllowFrom": [
             "tg:123456789"
+          ],
+          "allowFrom": [
+            "tg:123456789"
           ]
         },
         "maya": {
@@ -336,6 +345,9 @@ the first fallback for complex reasoning tasks.
           "dmPolicy": "pairing",
           "groupPolicy": "allowlist",
           "groupAllowFrom": [
+            "tg:123456789"
+          ],
+          "allowFrom": [
             "tg:123456789"
           ]
         }
@@ -350,7 +362,10 @@ Two Telegram bots are configured:
 - `maya` — a separate bot for the PA agent, DMs only with pairing
 
 `dmPolicy: "pairing"` means users must be paired (authorized) before they can DM the bot.
-`groupAllowFrom` restricts which Telegram user IDs can interact in groups.
+`groupAllowFrom` restricts which Telegram user IDs can interact in groups. When using
+`groupPolicy: "allowlist"`, you should set both `groupAllowFrom` and `allowFrom` at the top-level
+`channels.telegram` object and also at each account level with the same user IDs to avoid validation
+warnings.
 
 ---
 

@@ -443,6 +443,8 @@ Configures communication channel integrations.
     "telegram": {
       "enabled": true,
       "streaming": "partial",
+      "groupAllowFrom": ["tg:123456789"],
+      "allowFrom": ["tg:123456789"],
       "accounts": {
         "default": {
           "botToken": "${TELEGRAM_BOT_TOKEN}",
@@ -453,7 +455,8 @@ Configures communication channel integrations.
               "requireMention": false
             }
           },
-          "groupAllowFrom": ["tg:123456789"]
+          "groupAllowFrom": ["tg:123456789"],
+          "allowFrom": ["tg:123456789"]
         }
       }
     }
@@ -465,16 +468,29 @@ Configures communication channel integrations.
 OpenClaw treats each topic as a separate session. This allows a single agent to handle multiple
 parallel tasks (e.g. "Dev", "Research") without needing multiple agent definitions. :::
 
+#### Telegram top-level fields
+
+| Field            | Values  | Description                                                                                                   |
+| ---------------- | ------- | ------------------------------------------------------------------------------------------------------------- |
+| `enabled`        | boolean | Enable/disable Telegram channel                                                                               |
+| `streaming`      | string  | Streaming mode (e.g., `"partial"`)                                                                            |
+| `groupAllowFrom` | array   | Default user IDs allowed to interact in groups (applies to all accounts)                                      |
+| `allowFrom`      | array   | Default user IDs allowed to interact (set when using `groupPolicy: "allowlist"` to avoid validation warnings) |
+
+When using `groupPolicy: "allowlist"` at the account level, you should set both `groupAllowFrom` and
+`allowFrom` at the top-level `channels.telegram` object to avoid validation warnings.
+
 #### Telegram account fields
 
-| Field                       | Values                        | Description                                     |
-| --------------------------- | ----------------------------- | ----------------------------------------------- |
-| `botToken`                  | string                        | Telegram bot token (use `${ENV_VAR}`)           |
-| `dmPolicy`                  | `pairing`, `open`, `closed`   | Who can DM the bot                              |
-| `groupPolicy`               | `allowlist`, `open`, `closed` | Which groups the bot responds in                |
-| `groups`                    | object                        | Group-specific settings (keyed by group ID)     |
-| `groupAllowFrom`            | array                         | User IDs allowed to interact in groups          |
-| `groups[id].requireMention` | boolean                       | Whether the bot must be @mentioned in the group |
+| Field                       | Values                        | Description                                                                                           |
+| --------------------------- | ----------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `botToken`                  | string                        | Telegram bot token (use `${ENV_VAR}`)                                                                 |
+| `dmPolicy`                  | `pairing`, `open`, `closed`   | Who can DM the bot                                                                                    |
+| `groupPolicy`               | `allowlist`, `open`, `closed` | Which groups the bot responds in                                                                      |
+| `groups`                    | object                        | Group-specific settings (keyed by group ID)                                                           |
+| `groupAllowFrom`            | array                         | User IDs allowed to interact in groups                                                                |
+| `allowFrom`                 | array                         | User IDs allowed to interact (set when using `groupPolicy: "allowlist"` to avoid validation warnings) |
+| `groups[id].requireMention` | boolean                       | Whether the bot must be @mentioned in the group                                                       |
 
 ---
 
