@@ -28,6 +28,25 @@ For application-level changes, see the changelogs in the respective repositories
 - Development override swaps production nginx dashboard for Vite dev server with HMR and
   bind-mounted source
 
+#### Changed
+
+- Improved CORS configuration to handle requests with no origin (mobile apps, curl requests)
+- Updated Helmet security middleware configuration with crossOriginResourcePolicy
+- Reordered middleware (CORS before Helmet) to avoid configuration conflicts
+
+### mosbot-dashboard
+
+#### Added
+
+- Tool call display support in SessionDetailPanel with expandable argument details
+- ToolCallChip component for displaying tool calls with preview and expandable JSON arguments
+
+#### Changed
+
+- Message rendering now handles both string and array content formats (blocks-based messages)
+- Tool calls are now displayed alongside message content in session detail view
+- Improved handling of assistant messages with no content or tool calls (skips empty messages)
+
 ---
 
 ## 2026-03-02
