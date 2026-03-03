@@ -17,6 +17,17 @@ next to your OpenClaw instance. The image supports both `linux/amd64` and `linux
 
 See [Setting Up OpenClaw](./setup) for Docker and Kubernetes deployment examples. :::
 
+## Recommended mount configuration
+
+For full MosBot functionality (agent discovery + Projects/Skills/Docs file edits), use:
+
+- `WORKSPACE_ROOT=/workspace`
+- `WORKSPACE_SUBDIR=.`
+- A read-write mount of your OpenClaw home directory (for example `~/.openclaw:/workspace`)
+
+This avoids accidental `/workspace/workspace` nesting and ensures `openclaw.json` is visible to the
+workspace service.
+
 ## What the workspace service provides
 
 - **File access**: read, create, update, and delete files in agent workspaces

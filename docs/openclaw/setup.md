@@ -33,14 +33,14 @@ next to your OpenClaw instance, sharing the same workspace directory or volume.
 ### Option A: Docker (local)
 
 Add the MosBot workspace service to the same Docker Compose file as OpenClaw. It must share the same
-workspace volume:
+OpenClaw home directory volume:
 
 ```yaml
 services:
   openclaw:
     image: openclaw/openclaw:latest
     volumes:
-      - openclaw-workspace:/home/user/.openclaw/workspace
+      - openclaw-home:/home/node/.openclaw
     ports:
       - '18789:18789'
 
@@ -49,14 +49,26 @@ services:
     environment:
       WORKSPACE_SERVICE_TOKEN: your-secure-token
       WORKSPACE_ROOT: /workspace
+      WORKSPACE_SUBDIR: .
     volumes:
-      - openclaw-workspace:/workspace:ro
+      - openclaw-home:/workspace
     ports:
       - '8080:8080'
 
 volumes:
-  openclaw-workspace:
+  openclaw-home:
 ```
+
+:::info Why this mount shape?
+
+- Mount `~/.openclaw` (not only `~/.openclaw/workspace`) so the workspace service can access both
+  workspace files and `openclaw.json`.
+- `WORKSPACE_SUBDIR: .` exposes the mounted root directly and avoids accidental
+  `/workspace/workspace` path nesting.
+- Use read-write mounts for normal MosBot usage (Projects/Skills/Docs pages create and edit files).
+  Read-only mounts are only suitable for status/read-only troubleshooting.
+
+:::
 
 Once running, the services are available at:
 
@@ -71,7 +83,7 @@ See [Kubernetes Deployment](./kubernetes) for the full guide with manifests.
 
 ### Option C: VPS / remote server
 
-Run the workspace service container on the same server as OpenClaw, mounting the same workspace
+Run the workspace service container on the same server as OpenClaw, mounting the same workspace home
 directory:
 
 ```bash
@@ -79,7 +91,8 @@ docker run -d \
   --name mosbot-workspace \
   -e WORKSPACE_SERVICE_TOKEN=your-secure-token \
   -e WORKSPACE_ROOT=/workspace \
-  -v /path/to/openclaw/workspace:/workspace:ro \
+  -e WORKSPACE_SUBDIR=. \
+  -v /path/to/.openclaw:/workspace \
   -p 8080:8080 \
   ghcr.io/bymosbot/mosbot-workspace-service:latest
 ```

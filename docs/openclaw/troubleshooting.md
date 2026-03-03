@@ -50,6 +50,19 @@ curl http://localhost:18789/health
 
 ---
 
+### Workspace status returns `ENOENT ... /workspace/workspace`
+
+**Cause**: `WORKSPACE_SUBDIR` is effectively set to `workspace` while your volume is already mounted
+at the workspace directory. This creates an unintended nested lookup (`/workspace/workspace`).
+
+**Fix**:
+
+1. Mount OpenClaw home (`~/.openclaw`) to the container (for example `/workspace`)
+2. Set `WORKSPACE_SUBDIR=.` on the workspace service
+3. Use a read-write mount for normal dashboard usage (Projects/Skills/Docs and file creation)
+
+---
+
 ### 401 Unauthorized on OpenClaw endpoints
 
 **Cause**: The bearer token in MosBot's `.env` doesn't match the token configured in OpenClaw.
