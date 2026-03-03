@@ -48,22 +48,23 @@ services:
     image: ghcr.io/bymosbot/mosbot-workspace-service:latest
     environment:
       WORKSPACE_SERVICE_TOKEN: your-secure-token
-      WORKSPACE_FS_ROOT: /workspace
-      CONFIG_FS_ROOT: /openclaw-config
+      CONFIG_ROOT: /openclaw-config
+      MAIN_WORKSPACE_DIR: workspace
     volumes:
-      - ~/.openclaw/workspace:/workspace
       - ~/.openclaw:/openclaw-config
     ports:
       - '8080:8080'
 ```
 
-:::info Why this mount shape?
+:::info Path contract
 
-- `WORKSPACE_FS_ROOT` and `CONFIG_FS_ROOT` are independent, so OpenClaw config and workspace paths
-  can be configured separately.
-- Config files (`openclaw.json`, `org-chart.json`) are always loaded from `CONFIG_FS_ROOT`.
-- Use read-write mounts for normal MosBot usage (Projects/Skills/Docs plus config edits).
-  Read-only mounts are only suitable for read-only troubleshooting.
+- `CONFIG_ROOT` is the single mounted OpenClaw root (typically `~/.openclaw`).
+- `MAIN_WORKSPACE_DIR` selects the main workspace subdirectory inside that root (default:
+  `workspace`).
+- Main workspace virtual path is `/` (no `/workspace` alias).
+- Sub-agent workspaces resolve from `/workspace-<agent>` to `~/.openclaw/workspace-<agent>`.
+- Shared dirs `/projects`, `/skills`, `/docs` resolve to `~/.openclaw/{projects,skills,docs}`.
+- Use a read-write mount for normal MosBot usage (Projects/Skills/Docs and config edits).
 
 :::
 
@@ -87,9 +88,8 @@ directory:
 docker run -d \
   --name mosbot-workspace \
   -e WORKSPACE_SERVICE_TOKEN=your-secure-token \
-  -e WORKSPACE_FS_ROOT=/workspace \
-  -e CONFIG_FS_ROOT=/openclaw-config \
-  -v /path/to/openclaw/workspace:/workspace \
+  -e CONFIG_ROOT=/openclaw-config \
+  -e MAIN_WORKSPACE_DIR=workspace \
   -v /path/to/openclaw/config:/openclaw-config \
   -p 8080:8080 \
   ghcr.io/bymosbot/mosbot-workspace-service:latest
@@ -97,8 +97,8 @@ docker run -d \
 
 ## Migration from old workspace env model
 
-- Old: `WORKSPACE_ROOT` + `WORKSPACE_SUBDIR`
-- New: `WORKSPACE_FS_ROOT` + `CONFIG_FS_ROOT`
+- Old: `WORKSPACE_FS_ROOT` + `CONFIG_FS_ROOT`
+- New: `CONFIG_ROOT` + `MAIN_WORKSPACE_DIR`
 - Old variables are no longer honored.
 
 :::warning Security Note

@@ -52,14 +52,16 @@ curl http://localhost:18789/health
 
 ### Workspace status returns root path errors
 
-**Cause**: `WORKSPACE_FS_ROOT` and/or `CONFIG_FS_ROOT` do not point to mounted directories.
+**Cause**: `CONFIG_ROOT` and/or `MAIN_WORKSPACE_DIR` are misconfigured, or the mounted
+`CONFIG_ROOT` path is missing.
 
 **Fix**:
 
-1. Set `WORKSPACE_FS_ROOT` to the workspace mount (for example `/workspace`)
-2. Set `CONFIG_FS_ROOT` to the config mount (for example `/openclaw-config`)
-3. Verify both mounts exist and are readable by the workspace service container
-4. Use read-write mounts for normal dashboard usage (Projects/Skills/Docs and config editing)
+1. Set `CONFIG_ROOT` to the OpenClaw root mount (for example `/openclaw-config`)
+2. Set `MAIN_WORKSPACE_DIR` to the main workspace folder name (for example `workspace`)
+3. Verify `CONFIG_ROOT` exists and is readable by the workspace service container
+4. Verify `${CONFIG_ROOT}/${MAIN_WORKSPACE_DIR}` exists for main workspace access
+5. Use a read-write mount for normal dashboard usage (Projects/Skills/Docs and config editing)
 
 ---
 
@@ -114,12 +116,12 @@ curl -H "Authorization: Bearer <mosbot-jwt>" \
 
 ### Workspace loads, but models/agents fail
 
-**Cause**: Workspace root is mounted, but config root is not mounted correctly, so
+**Cause**: `CONFIG_ROOT` is not mounted correctly, so
 `/openclaw.json` cannot be read.
 
 **Fix**:
 
-1. Verify workspace service env includes `CONFIG_FS_ROOT`
+1. Verify workspace service env includes `CONFIG_ROOT`
 2. Verify config mount contains `openclaw.json` and `org-chart.json`
 3. Test directly:
    ```bash
@@ -131,7 +133,7 @@ curl -H "Authorization: Bearer <mosbot-jwt>" \
 
 ### Config edits fail, but file browsing works
 
-**Cause**: `CONFIG_FS_ROOT` is mounted read-only or points to the wrong directory.
+**Cause**: `CONFIG_ROOT` is mounted read-only or points to the wrong directory.
 
 **Fix**:
 
@@ -153,6 +155,18 @@ OpenClaw agent config.
 3. Most specific prefix wins when multiple prefixes match
 4. Add any extra custom prefixes via `OPENCLAW_PATH_REMAP_PREFIXES`, comma-separated
 5. Restart MosBot API
+
+---
+
+### `PATH_NOT_ALLOWED` when using `/workspace/...`
+
+**Cause**: `/workspace` is no longer a valid virtual path alias for main workspace.
+
+**Fix**:
+
+1. Use `/` for main workspace root
+2. Use `/workspace-<agent>` for sub-agent workspaces
+3. Use `/projects`, `/skills`, `/docs` for shared directories
 
 ---
 
