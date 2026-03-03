@@ -21,12 +21,13 @@ See [Setting Up OpenClaw](./setup) for Docker and Kubernetes deployment examples
 
 For full MosBot functionality (agent discovery + Projects/Skills/Docs file edits), use:
 
-- `WORKSPACE_ROOT=/workspace`
-- `WORKSPACE_SUBDIR=.`
-- A read-write mount of your OpenClaw home directory (for example `~/.openclaw:/workspace`)
+- `WORKSPACE_FS_ROOT=/workspace`
+- `CONFIG_FS_ROOT=/openclaw-config`
+- A read-write mount for workspace files (for example `~/.openclaw/workspace:/workspace`)
+- A read-write mount for OpenClaw config files (for example `~/.openclaw:/openclaw-config`)
 
-This avoids accidental `/workspace/workspace` nesting and ensures `openclaw.json` is visible to the
-workspace service.
+`openclaw.json` and `org-chart.json` are always resolved from `CONFIG_FS_ROOT`. All other paths are
+resolved from `WORKSPACE_FS_ROOT`.
 
 ## What the workspace service provides
 
@@ -46,8 +47,9 @@ OpenClaw Workspace Service (port 8080)
     │
     │ Filesystem access
     ▼
-Workspace PVC / directory
-(workspace-coo/, workspace-cto/, skills/, shared/, etc.)
+Workspace PVC / directories
+(`WORKSPACE_FS_ROOT`: workspace-coo/, workspace-cto/, skills/, docs/, projects/, etc.
+ `CONFIG_FS_ROOT`: openclaw.json, org-chart.json)
 ```
 
 In Kubernetes, the workspace service runs as a sidecar container in the OpenClaw pod and shares the
@@ -85,10 +87,10 @@ internet:
 
 ## Workspace directory structure
 
-A typical OpenClaw workspace layout:
+A typical OpenClaw split-root layout:
 
 ```text
-/                           ← workspace root
+/workspace                  ← WORKSPACE_FS_ROOT
 ├── workspace-coo/          ← agent workspace (COO agent)
 │   ├── memory/             ← agent memory files
 │   ├── skills/             ← agent-specific skills
@@ -98,8 +100,11 @@ A typical OpenClaw workspace layout:
 │   └── skills/
 ├── skills/                 ← shared skills (available to all agents)
 ├── docs/                   ← shared documentation
-├── projects/               ← shared project files
-└── openclaw.json           ← OpenClaw configuration
+└── projects/               ← shared project files
+
+/openclaw-config            ← CONFIG_FS_ROOT
+├── openclaw.json           ← OpenClaw configuration
+└── org-chart.json          ← Org chart configuration
 ```
 
 ## API endpoints (via MosBot API)
@@ -140,6 +145,13 @@ curl -H "Authorization: Bearer <mosbot-jwt>" \
 
 **401 Unauthorized** The token doesn't match. Verify `OPENCLAW_WORKSPACE_TOKEN` in MosBot API's
 `.env` matches the token configured in the workspace service.
+
+**Workspace loads but models/agents fail**
+`CONFIG_FS_ROOT` is not mounted correctly. Verify `/files/content?path=/openclaw.json` succeeds on
+the workspace service.
+
+**Config edits fail but file browsing works**
+`CONFIG_FS_ROOT` is mounted read-only or points to the wrong directory.
 
 **Path traversal errors** The path contains `..` or other traversal sequences. Use absolute paths
 from the workspace root (e.g. `/workspace-coo/memory/2026-03-01.md`).

@@ -40,7 +40,7 @@ services:
   openclaw:
     image: openclaw/openclaw:latest
     volumes:
-      - openclaw-home:/home/node/.openclaw
+      - ~/.openclaw:/home/node/.openclaw
     ports:
       - '18789:18789'
 
@@ -48,25 +48,22 @@ services:
     image: ghcr.io/bymosbot/mosbot-workspace-service:latest
     environment:
       WORKSPACE_SERVICE_TOKEN: your-secure-token
-      WORKSPACE_ROOT: /workspace
-      WORKSPACE_SUBDIR: .
+      WORKSPACE_FS_ROOT: /workspace
+      CONFIG_FS_ROOT: /openclaw-config
     volumes:
-      - openclaw-home:/workspace
+      - ~/.openclaw/workspace:/workspace
+      - ~/.openclaw:/openclaw-config
     ports:
       - '8080:8080'
-
-volumes:
-  openclaw-home:
 ```
 
 :::info Why this mount shape?
 
-- Mount `~/.openclaw` (not only `~/.openclaw/workspace`) so the workspace service can access both
-  workspace files and `openclaw.json`.
-- `WORKSPACE_SUBDIR: .` exposes the mounted root directly and avoids accidental
-  `/workspace/workspace` path nesting.
-- Use read-write mounts for normal MosBot usage (Projects/Skills/Docs pages create and edit files).
-  Read-only mounts are only suitable for status/read-only troubleshooting.
+- `WORKSPACE_FS_ROOT` and `CONFIG_FS_ROOT` are independent, so OpenClaw config and workspace paths
+  can be configured separately.
+- Config files (`openclaw.json`, `org-chart.json`) are always loaded from `CONFIG_FS_ROOT`.
+- Use read-write mounts for normal MosBot usage (Projects/Skills/Docs plus config edits).
+  Read-only mounts are only suitable for read-only troubleshooting.
 
 :::
 
@@ -90,12 +87,19 @@ directory:
 docker run -d \
   --name mosbot-workspace \
   -e WORKSPACE_SERVICE_TOKEN=your-secure-token \
-  -e WORKSPACE_ROOT=/workspace \
-  -e WORKSPACE_SUBDIR=. \
-  -v /path/to/.openclaw:/workspace \
+  -e WORKSPACE_FS_ROOT=/workspace \
+  -e CONFIG_FS_ROOT=/openclaw-config \
+  -v /path/to/openclaw/workspace:/workspace \
+  -v /path/to/openclaw/config:/openclaw-config \
   -p 8080:8080 \
   ghcr.io/bymosbot/mosbot-workspace-service:latest
 ```
+
+## Migration from old workspace env model
+
+- Old: `WORKSPACE_ROOT` + `WORKSPACE_SUBDIR`
+- New: `WORKSPACE_FS_ROOT` + `CONFIG_FS_ROOT`
+- Old variables are no longer honored.
 
 :::warning Security Note
 

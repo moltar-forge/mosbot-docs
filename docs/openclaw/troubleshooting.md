@@ -50,16 +50,16 @@ curl http://localhost:18789/health
 
 ---
 
-### Workspace status returns `ENOENT ... /workspace/workspace`
+### Workspace status returns root path errors
 
-**Cause**: `WORKSPACE_SUBDIR` is effectively set to `workspace` while your volume is already mounted
-at the workspace directory. This creates an unintended nested lookup (`/workspace/workspace`).
+**Cause**: `WORKSPACE_FS_ROOT` and/or `CONFIG_FS_ROOT` do not point to mounted directories.
 
 **Fix**:
 
-1. Mount OpenClaw home (`~/.openclaw`) to the container (for example `/workspace`)
-2. Set `WORKSPACE_SUBDIR=.` on the workspace service
-3. Use a read-write mount for normal dashboard usage (Projects/Skills/Docs and file creation)
+1. Set `WORKSPACE_FS_ROOT` to the workspace mount (for example `/workspace`)
+2. Set `CONFIG_FS_ROOT` to the config mount (for example `/openclaw-config`)
+3. Verify both mounts exist and are readable by the workspace service container
+4. Use read-write mounts for normal dashboard usage (Projects/Skills/Docs and config editing)
 
 ---
 
@@ -109,6 +109,48 @@ curl -H "Authorization: Bearer <mosbot-jwt>" \
    ```bash
    docker compose logs api --tail=50
    ```
+
+---
+
+### Workspace loads, but models/agents fail
+
+**Cause**: Workspace root is mounted, but config root is not mounted correctly, so
+`/openclaw.json` cannot be read.
+
+**Fix**:
+
+1. Verify workspace service env includes `CONFIG_FS_ROOT`
+2. Verify config mount contains `openclaw.json` and `org-chart.json`
+3. Test directly:
+   ```bash
+   curl -H "Authorization: Bearer <workspace-token>" \
+     "http://localhost:8080/files/content?path=/openclaw.json"
+   ```
+
+---
+
+### Config edits fail, but file browsing works
+
+**Cause**: `CONFIG_FS_ROOT` is mounted read-only or points to the wrong directory.
+
+**Fix**:
+
+1. Mount config path read-write
+2. Confirm container user has write permission
+3. Retry editing `openclaw.json` or `org-chart.json` from the dashboard
+
+---
+
+### Path remap errors (`PATH_NOT_ALLOWED`) for host-absolute paths
+
+**Cause**: `OPENCLAW_PATH_REMAP_PREFIXES` does not match the absolute path prefix returned by your
+OpenClaw agent config.
+
+**Fix**:
+
+1. Set `OPENCLAW_PATH_REMAP_PREFIXES` in MosBot API (default: `/home/node/.openclaw`)
+2. Include every prefix you expect, comma-separated if needed
+3. Restart MosBot API
 
 ---
 
