@@ -78,7 +78,7 @@ variables, the workspace browser and skills features will be unavailable.
 ## OpenClaw Gateway
 
 Required for agent monitoring, live session data, and runtime control. Without these variables, the
-org chart and agent monitoring features will be unavailable.
+agents page and agent monitoring features will be unavailable.
 
 | Variable                      | Default | Description                                                 |
 | ----------------------------- | ------- | ----------------------------------------------------------- |

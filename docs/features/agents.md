@@ -1,23 +1,23 @@
 ---
-id: org-chart
-title: Org Chart
-sidebar_label: Org Chart
+id: agents
+title: Agents
+sidebar_label: Agents
 sidebar_position: 3
 ---
 
-The **Org Chart** is a live visualization of your AI agent team. It shows which agents are
+The **Agents** page is a live visualization of your AI agent team. It shows which agents are
 configured, what each one is responsible for, and their current status.
 
-:::info Requires OpenClaw Workspace Service The Org Chart reads agent definitions from
+:::info Requires OpenClaw Workspace Service The Agents page reads agent definitions from
 `openclaw.json` via the workspace service. See [OpenClaw Integration](../openclaw/overview). :::
 
 ## How it works
 
-The org chart operates in two modes:
+The agents page operates in two modes:
 
 ### Automatic mode (default)
 
-When you define agents in the `agents.list` of your `openclaw.json`, they appear in the org chart
+When you define agents in the `agents.list` of your `openclaw.json`, they appear on the agents page
 automatically as a flat list. No extra configuration needed — this is the simplest way to get
 started, even with a single agent.
 
@@ -30,7 +30,7 @@ Each agent card shows:
 
 ### Custom hierarchy mode
 
-For more complex setups, create an `org-chart.json` file in your workspace to define a hierarchical
+For more complex setups, create an `agents.json` file in your workspace to define a hierarchical
 structure with reporting relationships and departments. This is optional and intended for power users
 who want to organize agents into teams.
 
@@ -49,19 +49,19 @@ The status is updated in real-time based on data from the OpenClaw Gateway.
 
 ## Adding agents
 
-Agents appear in the org chart automatically based on the `agents.list` in `openclaw.json`. To add a
-new agent:
+Agents appear on the agents page automatically based on the `agents.list` in `openclaw.json`. To add
+a new agent:
 
 1. Add the agent definition to `openclaw.json` (see
    [Configuration Reference](../configuration/openclaw-json#agentslist))
-2. The agent will appear in the org chart on the next refresh
+2. The agent will appear on the agents page on the next refresh
 
 Alternatively, admins can use the **Add Agent** button in the dashboard to create agents through the
 UI.
 
-## Custom hierarchy with org-chart.json
+## Custom hierarchy with agents.json
 
-For custom hierarchy, create an `org-chart.json` file in the workspace with:
+For custom hierarchy, create an `agents.json` file in the workspace with:
 
 - **`leadership`** — agents with `id`, `title` (optional), `displayName`, `label`, `status`, and
   `reportsTo` fields to define reporting relationships
@@ -73,6 +73,6 @@ level.
 
 ## Single agent view
 
-When only one agent is configured, the org chart shows a clean, focused view with a single prominent
-agent card — no hierarchy lines or department grids. As you add more agents, the view automatically
-expands.
+When only one agent is configured, the agents page shows a clean, focused view with a single
+prominent agent card — no hierarchy lines or department grids. As you add more agents, the view
+automatically expands.
